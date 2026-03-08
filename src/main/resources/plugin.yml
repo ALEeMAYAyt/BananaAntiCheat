@@ -1,0 +1,24 @@
+name: BananaAntiCheat
+version: 1.0
+main: it.aleemayayt.bananaanticheat.BananaAntiCheat
+api-version: 1.8
+description: Un anticheat basilare italiano adatto ai server 1.8!
+authors:
+  - ALEeMAYAyt
+  - nicoltao330
+depend:
+  - ProtocolLib
+
+commands:
+  banana:
+    aliases:
+      - bananaanticheat
+      - bananaac
+    description: Comando principale del BananaAntiCheat
+    usage: /<command>
+    permission: bananaac.admin
+
+permissions:
+  bananaac.admin:
+    description: Accesso ai comandi amministrativi
+    default: op

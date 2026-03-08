@@ -1,0 +1,132 @@
+# ╔═══════════════════════════════════════╗
+# ║ BananaAntiCheat - Configurazione      ║
+# ║                                       ║
+# ║ Autori:                               ║
+# ║  ALEeMAYAyt - Developer               ║
+# ║  nicoltao330 - Idee e nome            ║
+# ║  ItzN3xi - Aiuto generale e Testing   ║
+# ║  JustCuz_ - Aiuto generale e Testing  ║
+# ║                                       ║
+# ╚═══════════════════════════════════════╝
+
+prefix: "&c&l[&eBananaAntiCheat&c&l] &7» &r"
+flag-message: "%prefix% &c%player% &7ha fallito il check &e%check% &7(&b%vl%&7)"
+max-vl: 50
+ban-message: "&c&l[&e&lBananaAntiCheat&c&l] &cCheating (AntiCheat)"
+
+database:
+  enabled: true
+  type: "mysql"
+  host: "localhost"
+  port: 3306
+  database: "banana"
+  username: "root"
+  password: "password"
+
+local-logs: true
+
+check-settings:
+  speed:
+    enabled: true
+    maxSpeed: 0.5
+    vl: 1
+    vl-threshold: 10
+  fly:
+    enabled: true
+    vl: 1
+    vl-threshold: 12
+  nofall:
+    enabled: true
+    vl: 1
+    vl-threshold: 8
+    min-fall-dist: 3.5
+  jesus:
+    enabled: true
+    vl: 1
+    vl-threshold: 6
+  spider:
+    enabled: true
+    vl: 1
+    vl-threshold: 6
+  step:
+    enabled: true
+    max-step-height: 1.2
+    vl: 1
+    vl-threshold: 6
+
+  killaura:
+    enabled: true
+    vl: 1
+    vl-threshold: 12
+    multi-entity-threshold: 6
+  reach:
+    enabled: true
+    maxReach: 4.2
+    vl: 1
+    vl-threshold: 8
+  aimbot:
+    enabled: true
+    dot-threshold: 0.98
+    vl: 1
+    vl-threshold: 8
+  velocity:
+    enabled: true
+    min-knockback: -0.1
+    vl: 1
+    vl-threshold: 6
+  criticals:
+    enabled: true
+    max-critical-per-sec: 8
+    vl: 1
+    vl-threshold: 8
+  autoclicker:
+    enabled: true
+    maxCPS: 37
+    vl: 1
+    vl-threshold: 10
+
+  scaffold:
+    enabled: true
+    vl: 1
+    vl-threshold: 8
+  nuker:
+    enabled: true
+    breaks-per-sec: 15
+    vl: 1
+    vl-threshold: 10
+  fastplace:
+    enabled: true
+    vl-ms: 60
+    vl: 1
+    vl-threshold: 8
+  noslow:
+    enabled: true
+    move-threshold: 0.15
+    vl: 1
+    vl-threshold: 6
+  fastbreak:
+    enabled: true
+    vl-ms: 150
+    vl: 1
+    vl-threshold: 8
+
+  badpackets:
+    enabled: true
+    min-interval-ms: 20
+    vl: 1
+    vl-threshold: 6
+  fastbow:
+    enabled: true
+    vl-ms: 800
+    vl: 1
+    vl-threshold: 6
+  autoarmor:
+    enabled: true
+    vl-ms: 120
+    vl: 1
+    vl-threshold: 5
+  timer:
+    enabled: true
+    min-ms: 35
+    vl: 1
+    vl-threshold: 8
