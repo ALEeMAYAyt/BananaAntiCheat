@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 [![Java](https://img.shields.io/badge/java-8+-orange.svg)](https://www.oracle.com/java/)
 
-Un anticheat **semplice e basilare** per server Minecraft 1.8+, ottimizzato per PvP e modalità competitive come BedWars e SkyWars.
+Un anticheat **semplice e basilare** per server Minecraft 1.8+, ottimizzato per PvP e modalità competitive come BedWars e Bridging.
 
 ## ✨ Caratteristiche
 
