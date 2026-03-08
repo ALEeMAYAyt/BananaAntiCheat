@@ -39,16 +39,14 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
     private ConfigManager configManager;
     private ProtocolManager protocolManager;
 
-    // Per-player state
     private final Map<UUID, PlayerData> dataMap = new HashMap<>();
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         this.configManager = new ConfigManager(this);
-        configManager.load(); // Carica tutte le impostazioni
+        configManager.load();
 
-        // register bukkit listeners
         Bukkit.getPluginManager().registerEvents(this, this);
 
         // ProtocolLib packet listener
@@ -60,7 +58,7 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
             getLogger().warning("[BananaAntiCheat] ProtocolLib non disponibile o errore inizializzazione: " + t.getMessage());
         }
 
-        // command
+        // comando
         getCommand("banana").setExecutor(this);
 
         getLogger().info(ChatColor.translateAlternateColorCodes('&', configManager.getPrefix()) + " abilitato.");
@@ -68,7 +66,6 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
 
     @Override
     public void onDisable() {
-        // clean-up
         try {
             if (protocolManager != null) {
                 protocolManager.removePacketListeners(this);
@@ -80,7 +77,6 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
     // ---------------- Command /banana ----------------
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        // Questa riga converte i codici & in colori reali
         String prefix = ChatColor.translateAlternateColorCodes('&', configManager.getPrefix());
 
         if (!(sender instanceof Player)) {
@@ -100,7 +96,6 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
             reloadConfig();
             configManager.load();
 
-            // Aggiorniamo il prefix colorato dopo il reload
             String newPrefix = ChatColor.translateAlternateColorCodes('&', configManager.getPrefix());
             p.sendMessage(newPrefix + ChatColor.GREEN + " Plugin e Configurazione ricaricati con successo.");
             return true;
@@ -145,13 +140,12 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
         double dz = to.getZ() - from.getZ();
         double horizontal = Math.sqrt(dx * dx + dz * dz);
 
-        // SPEED - Reso molto meno aggressivo
+        // Speed
         if (configManager.isSpeedEnabled() && !p.isFlying() && !p.isInsideVehicle()) {
             double maxSpeed = configManager.getSpeedMaxSpeed();
-            // Consideriamo solo movimenti significativi e aggiungiamo tolleranza
             if (horizontal > maxSpeed && p.getFallDistance() < 0.1 && p.isOnGround()) {
                 st.incrementSpeedViolations();
-                // Flagga solo dopo multiple violazioni consecutive
+                //flagga solo dopo multiple violazioni consecutive
                 if (st.getSpeedViolations() > 3) {
                     flag(p, "Speed");
                     st.resetSpeedViolations();
@@ -161,23 +155,20 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
             }
         }
 
-        // STEP - Migliorato per evitare false positive con scale/lastre
+        // STEP
         if (configManager.isStepEnabled() && !p.isFlying() && !p.isInsideVehicle()) {
             double yDiff = to.getY() - from.getY();
-            // Solo se è un vero step (non scale, non lastre)
             if (yDiff > configManager.getStepMaxHeight() && yDiff < 10.0 && p.isOnGround()) {
-                // Verifica che non ci siano scale o lastre nelle vicinanze
                 if (!hasStairsOrSlabsNearby(to) && !hasStairsOrSlabsNearby(from)) {
                     flag(p, "Step");
                 }
             }
         }
 
-        // JESUS - Migliorato per considerare barche e situazioni legittime
+        // Jesus
         if (configManager.isJesusEnabled() && !p.isFlying() && !p.isInsideVehicle()) {
             Block under = to.getBlock().getRelative(0, -1, 0);
             if ((under.getType() == Material.WATER || under.getType() == Material.STATIONARY_WATER)) {
-                // Solo se sta davvero camminando sull'acqua (non nuotando)
                 if (p.getVelocity().getY() >= -0.1 && p.getLocation().getY() > under.getY() + 0.9) {
                     st.incrementJesusViolations();
                     if (st.getJesusViolations() > 5) {
@@ -192,10 +183,9 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
             }
         }
 
-        // SPIDER - Molto più preciso
+        // Spider
         if (configManager.isSpiderEnabled() && !p.isFlying() && !p.isInsideVehicle()) {
             if (isAgainstWall(p) && to.getY() > from.getY() + 0.1 && !p.isOnGround() && p.getFallDistance() < 0.5) {
-                // Verifica che non ci siano ladder/vine nelle vicinanze
                 if (!hasClimbableNearby(p.getLocation())) {
                     st.incrementSpiderViolations();
                     if (st.getSpiderViolations() > 4) {
@@ -210,7 +200,7 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
             }
         }
 
-        // NOSLOW - Più realistico
+        // NoSlow
         if (configManager.isNoslowEnabled() && p.isBlocking() && p.isSneaking()) {
             if (horizontal > configManager.getNoslowMoveThreshold()) {
                 st.incrementNoslowViolations();
@@ -227,7 +217,6 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
         st.setLastLocation(to);
     }
 
-    // Metodi helper migliorati
     private boolean hasStairsOrSlabsNearby(Location loc) {
         for (int x = -1; x <= 1; x++) {
             for (int y = -1; y <= 1; y++) {
@@ -271,7 +260,7 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
                 }
             }
         }
-        return solidBlocks >= 3; // Deve essere davvero contro un muro
+        return solidBlocks >= 3;
     }
 
     @EventHandler
@@ -283,13 +272,12 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
         PlayerData st = getData(p);
         long now = System.currentTimeMillis();
 
-        // FASTPLACE - Ottimizzato per Telly Bridge (Shift+W+Click destro rapido)
+        // fastplace
         if (configManager.isFastplaceEnabled()) {
             long diff = now - st.getLastPlace();
             if (st.getLastPlace() > 0 && diff < configManager.getFastplaceVlMs()) {
                 st.incrementFastplaceViolations();
-                // Soglia molto più alta per permettere Telly Bridge legittimo
-                if (st.getFastplaceViolations() > 12) { // Era 8, ora 12 per Telly Bridge
+                if (st.getFastplaceViolations() > 12) {
                     flag(p, "FastPlace");
                     st.resetFastplaceViolations();
                 }
@@ -298,23 +286,21 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
             }
         }
 
-        // SCAFFOLD - Molto più accurato e tollerante per building veloce
+        // scaffold
         if (configManager.isScaffoldEnabled()) {
             Block placedBlock = e.getBlockPlaced();
             Location playerLoc = p.getLocation();
             double heightDiff = playerLoc.getY() - placedBlock.getY();
 
-            // Solo se piazza sotto di sé mentre è in aria E sta cadendo
             if (heightDiff > 2.0 && heightDiff < 5.0 && !p.isOnGround() && p.getFallDistance() > 2.0) {
-                // Verifica che il blocco sia effettivamente sotto di lui (non di lato)
                 double horizontalDist = Math.sqrt(
                         Math.pow(playerLoc.getX() - placedBlock.getX() - 0.5, 2) +
                                 Math.pow(playerLoc.getZ() - placedBlock.getZ() - 0.5, 2)
                 );
 
-                if (horizontalDist < 1.0) { // Molto vicino sotto di lui
+                if (horizontalDist < 1.0) {
                     st.incrementScaffoldViolations();
-                    if (st.getScaffoldViolations() > 4) { // Serve conferma multipla
+                    if (st.getScaffoldViolations() > 4) {
                         flag(p, "Scaffold");
                         st.resetScaffoldViolations();
                     }
@@ -337,7 +323,7 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
         PlayerData st = getData(p);
         long now = System.currentTimeMillis();
 
-        // FASTBREAK - Meno aggressivo e considera hardness dei blocchi
+        // Fastbreak
         if (configManager.isFastbreakEnabled()) {
             long diff = now - st.getLastBreak();
 
@@ -352,7 +338,7 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
 
             if (!isSoftBlock && diff > 0 && diff < configManager.getFastbreakVlMs()) {
                 st.incrementFastbreakViolations();
-                if (st.getFastbreakViolations() > 8) { // Era 5, ora 8
+                if (st.getFastbreakViolations() > 8) {
                     flag(p, "FastBreak");
                     st.resetFastbreakViolations();
                 }
@@ -361,7 +347,7 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
             }
         }
 
-        // NUKER - Soglia più alta
+        // Nuker
         if (configManager.isNukerEnabled()) {
             st.tickBreak();
             if (st.getBreaksPerSecond() > configManager.getNukerBreaksPerSec()) {
@@ -374,12 +360,12 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
 
     @EventHandler
     public void onInventoryOpen(InventoryOpenEvent e) {
-        // InventoryWalk check rimosso - troppo buggy
+        // InventoryWalk check rimosso - troppo buggato
     }
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent e) {
-        // InventoryWalk check rimosso - troppo buggy
+        // InventoryWalk check rimosso - troppo buggato
     }
 
     @EventHandler
@@ -411,7 +397,6 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
         if (p.hasPermission("bananaac.bypass")) return;
 
         if (configManager.isNofallEnabled() && e.getCause() == EntityDamageEvent.DamageCause.FALL) {
-            // Solo controlla se il danno è completamente assente con alta caduta
             if (p.getFallDistance() > configManager.getNofallMinFallDist() && e.getDamage() < 0.5) {
                 PlayerData st = getData(p);
                 st.incrementNofallViolations();
@@ -431,7 +416,7 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
 
         PlayerData st = getData(attacker);
 
-        // CRITICALS - Meno sensibile
+        // Criticals
         if (configManager.isCriticalsEnabled()) {
             if (attacker.getFallDistance() > 0.0 && !attacker.isOnGround() && attacker.getVelocity().getY() < 0) {
                 st.incrementCriticals();
@@ -442,7 +427,7 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
             }
         }
 
-        // VELOCITY - Più realistico
+        // Velocity
         if (configManager.isVelocityEnabled() && e.getEntity() instanceof Player) {
             final Player victim = (Player) e.getEntity();
             final Vector initialVelocity = victim.getVelocity();
@@ -481,27 +466,26 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
             PlayerData st = getData(p);
 
             if (type == PacketType.Play.Client.FLYING || type == PacketType.Play.Client.POSITION || type == PacketType.Play.Client.POSITION_LOOK) {
-                // TIMER - Meno aggressivo e ignora giocatori fermi/freezati
+                // Timer
                 if (configManager.isTimerEnabled()) {
                     long now = System.currentTimeMillis();
                     long last = st.getLastFlyingPacket();
                     if (last > 0) {
                         long interval = now - last;
 
-                        // Verifica se il player si sta muovendo effettivamente
                         Location currentLoc = p.getLocation();
                         Location lastLoc = st.getLastLocation();
                         boolean isMoving = false;
 
                         if (lastLoc != null && lastLoc.getWorld().equals(currentLoc.getWorld())) {
                             double distance = lastLoc.distance(currentLoc);
-                            isMoving = distance > 0.01; // Movimento minimo rilevabile
+                            isMoving = distance > 0.01;
                         }
 
-                        // Flagga solo se si sta muovendo E l'intervallo è troppo basso
+                        
                         if (interval < configManager.getTimerMinMs() && isMoving) {
                             st.incrementTimerViolations();
-                            if (st.getTimerViolations() > 15) { // Ancora più tollerante (era 10)
+                            if (st.getTimerViolations() > 15) {
                                 flag(p, "Timer");
                                 st.resetTimerViolations();
                             }
@@ -512,7 +496,7 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
                     st.setLastFlyingPacket(now);
                 }
 
-                // FLY - Molto migliorato
+                // Fly
                 if (configManager.isFlyEnabled() && !p.getAllowFlight() && p.getVehicle() == null) {
                     if (p.getFallDistance() == 0.0 && !p.isOnGround() && !hasBlocksNearby(p.getLocation())) {
                         st.incrementAirborneTicks();
@@ -525,16 +509,15 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
                     }
                 }
 
-                // INVENTORY WALK - RIMOSSO (troppo buggy con GUI normali)
+                // INVENTORY WALK - RIMOSSO (troppo buggato, si lo so prima di fare il release ci ho lavorato mesi e mesi sopra)
             }
 
             if (type == PacketType.Play.Client.ARM_ANIMATION) {
-                // AUTOCLICKER - Separato dal mining per evitare falsi positivi
+                // AUTOCLICKER
                 if (configManager.isAutoclickerEnabled()) {
                     long now = System.currentTimeMillis();
                     long timeSinceLastBreak = now - st.getLastBreak();
 
-                    // Ignora click se sta minando (ultimo break < 500ms fa)
                     if (timeSinceLastBreak > 500) {
                         st.tickClick();
                         if (st.getCps() > configManager.getAutoclickerMaxCPS()) {
@@ -549,7 +532,7 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
                     }
                 }
 
-                // FASTBOW - Migliorato
+                // FASTBOW
                 if (configManager.isFastbowEnabled() && p.getItemInHand() != null &&
                         p.getItemInHand().getType() == Material.BOW) {
                     long now = System.currentTimeMillis();
@@ -571,9 +554,9 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
                     Entity target = protocolManager.getEntityFromID(p.getWorld(), packet.getIntegers().read(0));
                     if(target == null) return;
 
-                    // REACH - Più preciso
+                    // REACH
                     if (configManager.isReachEnabled()) {
-                        double dist = p.getEyeLocation().distance(target.getLocation()) - 0.6; // Più tollerante
+                        double dist = p.getEyeLocation().distance(target.getLocation()) - 0.6;
                         if (dist > configManager.getReachMaxReach()) {
                             st.incrementReachViolations();
                             if (st.getReachViolations() > 3) {
@@ -585,7 +568,7 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
                         }
                     }
 
-                    // KILLAURA - Molto migliorato
+                    // KILLAURA
                     if (configManager.isKillauraEnabled()) {
                         st.trackAttack(target.getUniqueId());
                         int distinctTargets = st.getDistinctRecentAttacks();
@@ -600,14 +583,14 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
                         }
                     }
 
-                    // AIMBOT - Più realistico
+                    // AIMBOT
                     if (configManager.isAimbotEnabled()) {
                         Vector toTarget = target.getLocation().toVector().subtract(p.getEyeLocation().toVector()).normalize();
                         Vector playerDirection = p.getLocation().getDirection();
                         double dot = toTarget.dot(playerDirection);
                         if (dot > configManager.getAimbotDotThreshold()) {
                             st.incrementAimbotViolations();
-                            if (st.getAimbotViolations() > 8) { // Molto tollerante
+                            if (st.getAimbotViolations() > 8) {
                                 flag(p, "Aimbot");
                                 st.resetAimbotViolations();
                             }
@@ -623,7 +606,7 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
                     long now = System.currentTimeMillis();
                     if(st.getLastKeepAlive() > 0 && now - st.getLastKeepAlive() < configManager.getBadpacketsMinIntervalMs()){
                         st.incrementBadpacketsViolations();
-                        if (st.getBadpacketsViolations() > 10) { // Molto tollerante
+                        if (st.getBadpacketsViolations() > 10) {
                             flag(p, "BadPackets");
                             st.resetBadpacketsViolations();
                         }
@@ -636,7 +619,7 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
         }
     }
 
-    // Helper per il check Fly
+    // helper per il check fly
     private boolean hasBlocksNearby(Location loc) {
         for (int x = -2; x <= 2; x++) {
             for (int y = -3; y <= 1; y++) {
@@ -662,7 +645,6 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
         int currentVl = st.getVl(checkName);
         int threshold = configManager.getCheckVlThreshold(checkName);
 
-        // Traduci TUTTO prima, incluso il prefix originale
         String translatedPrefix = ChatColor.translateAlternateColorCodes('&', configManager.getPrefix());
         String translatedFlagMsg = ChatColor.translateAlternateColorCodes('&', configManager.getFlagMessage());
 
@@ -716,8 +698,7 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
         private final Deque<Long> breaks = new ArrayDeque<>();
         private final Deque<UUID> recentAttacks = new ArrayDeque<>();
         private final Deque<Long> criticals = new ArrayDeque<>();
-
-        // Contatori per le violazioni consecutive - evita falsi positivi
+        
         private int speedViolations = 0;
         private int jesusViolations = 0;
         private int spiderViolations = 0;
@@ -739,7 +720,7 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
 
         PlayerData(UUID id) { this.uuid = id; }
 
-        // Getters e Setters base
+        // getters e setters base
         void setLastLocation(Location l) { this.lastLocation = l; }
         Location getLastLocation() { return lastLocation; }
         void setLastFlyingPacket(long t) { this.lastFlyingPacket = t; }
@@ -760,7 +741,6 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
         void resetAirborneTicks() { this.ticksAirborne = 0; }
         int getTicksAirborne() { return ticksAirborne; }
 
-        // Metodi per gestire le violazioni consecutive
         void incrementSpeedViolations() { speedViolations = Math.min(speedViolations + 1, 10); }
         void decrementSpeedViolations() { speedViolations = Math.max(speedViolations - 1, 0); }
         void resetSpeedViolations() { speedViolations = 0; }
@@ -849,7 +829,6 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
         void resetScaffoldViolations() { scaffoldViolations = 0; }
         int getScaffoldViolations() { return scaffoldViolations; }
 
-        // Metodi per CPS tracking
         void tickClick() {
             long now = System.currentTimeMillis();
             clicks.addLast(now);
@@ -857,7 +836,6 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
         }
         int getCps() { return clicks.size(); }
 
-        // Metodi per break tracking
         void tickBreak() {
             long now = System.currentTimeMillis();
             breaks.addLast(now);
@@ -866,7 +844,6 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
         int getBreaksPerSecond() { return breaks.size(); }
         void resetBreaks() { breaks.clear(); }
 
-        // Metodi per attack tracking (KillAura)
         void trackAttack(UUID id) {
             recentAttacks.addLast(id);
             long now = System.currentTimeMillis();
@@ -875,7 +852,6 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
         }
         int getDistinctRecentAttacks() { return new HashSet<>(recentAttacks).size(); }
 
-        // Metodi per criticals tracking
         void incrementCriticals() {
             long now = System.currentTimeMillis();
             criticals.addLast(now);
@@ -884,14 +860,13 @@ public class BananaAntiCheat extends JavaPlugin implements Listener, TabExecutor
         int getCriticalsInWindow() { return criticals.size(); }
         void resetCriticals() { criticals.clear(); }
 
-        // VL Management
         void addVl(String check, int inc) { vlMap.put(check, vlMap.getOrDefault(check, 0) + inc); }
         int getVl(String check) { return vlMap.getOrDefault(check, 0); }
     }
 }
 
 /**
- * Classe dedicata a caricare e gestire tutte le impostazioni dal file config.yml
+ * classe dedicata a caricare e gestire tutte le impostazioni dal file config.yml
  */
 class ConfigManager {
     private final BananaAntiCheat plugin;
@@ -958,7 +933,7 @@ class ConfigManager {
         dbUsername = cfg.getString("database.username", "root");
         dbPassword = cfg.getString("database.password", "password");
 
-        // Checks con valori di fallback ottimizzati
+        // Checks
         speedEnabled = cfg.getBoolean("check-settings.speed.enabled", true);
         speedMaxSpeed = cfg.getDouble("check-settings.speed.maxSpeed", 0.5);
 
@@ -1018,7 +993,6 @@ class ConfigManager {
         timerMinMs = cfg.getInt("check-settings.timer.min-ms", 35);
     }
 
-    // Dynamic getters for per-check VL and Threshold
     public int getCheckVl(String checkName) {
         return cfg.getInt("check-settings." + checkName.toLowerCase() + ".vl", 1);
     }
@@ -1027,7 +1001,6 @@ class ConfigManager {
         return cfg.getInt("check-settings." + checkName.toLowerCase() + ".vl-threshold", this.maxVl);
     }
 
-    // Getters for all settings
     public String getPrefix() { return prefix; }
     public String getFlagMessage() { return flagMessage; }
     public String getBanMessage() { return banMessage; }
