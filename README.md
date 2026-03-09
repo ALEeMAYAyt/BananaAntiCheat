@@ -56,7 +56,7 @@ Un anticheat **semplice e basilare** per server Minecraft 1.8+, ottimizzato per 
 
 ### Passi
 1. Scarica [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/)
-2. Scarica l'ultima versione di BananaAntiCheat dalla sezione [Releases](https://github.com/yourusername/BananaAntiCheat/releases)
+2. Scarica l'ultima versione di BananaAntiCheat dalla sezione [Releases](https://github.com/ALEeMAYAyt/BananaAntiCheat/releases)
 3. Metti entrambi i file JAR nella cartella `plugins/`
 4. Riavvia il server
 5. Modifica `plugins/BananaAntiCheat/config.yml` se necessario
@@ -103,7 +103,7 @@ BananaAntiCheat include ottimizzazioni per:
 
 ```bash
 # Clona il repository
-git clone https://github.com/yourusername/BananaAntiCheat.git
+git clone https://github.com/ALEeMAYAyt/BananaAntiCheat.git
 cd BananaAntiCheat
 
 # Compila con Maven
@@ -143,7 +143,7 @@ I contributi sono benvenuti! Per favore:
 
 ## 🐛 Segnalare Bug
 
-Hai trovato un bug? [Apri una issue](https://github.com/yourusername/BananaAntiCheat/issues/new) con:
+Hai trovato un bug? [Apri una issue](https://github.com/ALEeMAYAyt/BananaAntiCheat/issues/new) con:
 - Descrizione dettagliata del problema
 - Passi per riprodurlo
 - Versione di Minecraft e del plugin
@@ -160,7 +160,7 @@ Hai trovato un bug? [Apri una issue](https://github.com/yourusername/BananaAntiC
 
 ## 👥 Autori
 
-- **ALEeMAYAyt** - *Developer principale* - [GitHub](https://github.com/yourusername)
+- **ALEeMAYAyt** - *Developer principale* - [GitHub](https://github.com/ALEeMAYAyt)
 - **nicoltao330** - *Idee e naming*
 - **ItzN3xi** - *Aiuto generale e Testing*
 - **JustCuz_** - *Aiuto generale e Testing*
@@ -181,6 +181,6 @@ Questo progetto è licenziato sotto la Licenza MIT - vedi il file [LICENSE](LICE
 
 **Se ti piace BananaAntiCheat, lascia una ⭐!**
 
-[Report Bug](https://github.com/yourusername/BananaAntiCheat/issues) · [Request Feature](https://github.com/yourusername/BananaAntiCheat/issues) · [SpigotMC](https://www.spigotmc.org/resources/)
+[Report Bug](https://github.com/ALEeMAYAyt/BananaAntiCheat/issues) · [Request Feature](https://github.com/ALEeMAYAyt/BananaAntiCheat/issues) · [SpigotMC](https://www.spigotmc.org/resources/)
 
 </div>
